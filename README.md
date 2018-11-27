@@ -1,4 +1,4 @@
-# kdb Integration with systemd Notification Mechanism
+# Shared Library for kdb -> systemd Notify Mechanism
 
 This repository provides a shared library that can be used to communicate with `systemd` to notify it of the lifecycle of a kdb process or application.
 
