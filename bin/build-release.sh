@@ -51,7 +51,7 @@ main()
     export KSL_OUT=$BUILD_DIR
 
     make clean
-    make build_init build_lib_64
+    make all
 
     if [[ $? -ne 0 ]]; then
         echo -e "\nERROR: Build failed. Check output above and try again"
