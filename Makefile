@@ -4,9 +4,18 @@
 CC = gcc
 PROG = libkdbsystemd.so
 
-CPP_SRC = $(CURDIR)/src
+ifeq (${KSL_SRC},)
+  CPP_SRC = $(CURDIR)/src
+else
+  CPP_SRC = ${KSL_SRC}
+endif
 
-CPP_OUT_ROOT = $(CURDIR)/build
+ifeq (${KSL_OUT},)
+  CPP_OUT_ROOT = $(CURDIR)/build
+else
+  CPP_OUT_ROOT = ${KSL_OUT}
+endif
+
 CPP_OUT_32 = $(CPP_OUT_ROOT)/lib
 CPP_OUT_64 = $(CPP_OUT_ROOT)/lib64
 
