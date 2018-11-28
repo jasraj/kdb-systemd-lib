@@ -1,7 +1,7 @@
 # Makefile - kdb Integration with systemd Nofication Mechanism
 # Copyright (c) 2018 Jaskirat Rajasansir
 
-CC = gcc
+CC = g++
 PROG = libkdbsystemd.so
 
 ifeq (${KSL_SRC},)
