@@ -102,10 +102,14 @@ extern "C" K sendWatchdog(K nullArg) {
 }
 
 extern "C" K sendStatus(K status) {
-    if(status->t != -KS)
-        return krr((char*) "[lib-kdbsystemd] Incorrect type for status. Must be symbol");
+    std::string statusStr;
 
-    std::string statusStr = std::string(status->s);
+    if(status->t == -KS)
+        statusStr = std::string(status->s);
+    else if(status->t == KC)
+        statusStr = std::string((const char*) kC(status), status->n);
+    else
+        return krr((char*) "[lib-kdbsystemd] Incorrect type for status. Must be symbol or string");
 
     if(statusStr.empty())
         return krr((char*) "[lib-kdbsystemd] No status specified");
