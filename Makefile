@@ -19,7 +19,7 @@ endif
 CPP_OUT_32 = $(CPP_OUT_ROOT)/lib
 CPP_OUT_64 = $(CPP_OUT_ROOT)/lib64
 
-CPP_FLAGS = -v -std=c++11 -shared -fPIC -DKXVER=3 -I. -lsystemd
+CPP_FLAGS = -v -std=c++11 -Wall -shared -fPIC -DKXVER=3 -I$(CPP_SRC)/.. -lsystemd
 
 
 all: build_init build_lib_64 build_lib_32
