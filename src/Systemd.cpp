@@ -150,10 +150,13 @@ extern "C" K sendMainPid(K intOrNullArg) {
 extern "C" K extendTimeout(K timespan) {
     int timeoutUs;
 
-    if(timespan->t == -KN)
-        timeoutUs = timespan->j / 1000;
-    else
-        return krr((char*) "[lib-kdbsystemd] Incorrect type for start timeout extension. Must be timespan");
+    if(timespan->t != -KN)
+        return krr((char*) "[lib-kdbsystemd] Incorrect type for timeout extension. Must be timespan");
+
+    if(timespan->j == nj)
+        return krr((char*) "[lib-kdbsystemd] Cannot specify null timeout extension");
+
+    timeoutUs = timespan->j / 1000;
 
     if(timeoutUs <= 0)
         return krr((char*) "[lib-kdbsystemd] Incorrect value for start timeout extension. Must be greater than 0 us");
