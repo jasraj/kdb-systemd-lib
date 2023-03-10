@@ -32,8 +32,8 @@ const std::string isStatusPrefix = std::string("STATUS=");
 // systemd string prefix to publish the main PID
 const std::string mainPidPrefix = std::string("MAINPID=");
 
-// systemd string prefix to publish start-up time extension
-const std::string extendStartTimeoutPrefix = std::string("EXTEND_TIMEOUT_USEC=");
+// systemd string prefix to publish timeout extension
+const std::string extendTimeoutPrefix = std::string("EXTEND_TIMEOUT_USEC=");
 
 // Multiplier to convert between milliseconds and nanoseconds
 const uint64_t msToNano = 1000000;
@@ -87,10 +87,10 @@ void sendMainPid(int pid) {
     sd_pid_notify(getpid(), 0, mainPidStr.append(std::to_string(pid)).c_str());
 }
 
-// Allows the kdb process to extend the amount of time taken to start the process (e.g. during TP log file checking)
+// Allows the kdb process to extend the amount of time taken to transition the process (e.g. during process start, before ready to check TP log file)
 //  @param extendTimeUs The time extension required in microseconds
-void extendStartTimeout(int extendTimeUs) {
-    std::string timeoutStr = std::string(extendStartTimeoutPrefix);
+void extendTimeout(int extendTimeUs) {
+    std::string timeoutStr = std::string(extendTimeoutPrefix);
     sd_pid_notify(getpid(), 0, timeoutStr.append(std::to_string(extendTimeUs)).c_str());
 }
 
@@ -147,7 +147,7 @@ extern "C" K sendMainPid(K intOrNullArg) {
     return kb(1);
 }
 
-extern "C" K extendStartTimeout(K timespan) {
+extern "C" K extendTimeout(K timespan) {
     int timeoutUs;
 
     if(timespan->t == -KN)
@@ -158,6 +158,6 @@ extern "C" K extendStartTimeout(K timespan) {
     if(timeoutUs <= 0)
         return krr((char*) "[lib-kdbsystemd] Incorrect value for start timeout extension. Must be greater than 0 us");
 
-    kdbsystemd::extendStartTimeout(timeoutUs);
+    kdbsystemd::extendTimeout(timeoutUs);
     return kb(1);
 }
