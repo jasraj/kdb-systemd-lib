@@ -29,6 +29,12 @@ const std::string isWatchdog = std::string("WATCHDOG=1");
 // systemd string prefix to publish information to systemd
 const std::string isStatusPrefix = std::string("STATUS=");
 
+// systemd string prefix to publish the main PID
+const std::string mainPidPrefix = std::string("MAINPID=");
+
+// systemd string prefix to publish start-up time extension
+const std::string extendStartTimeoutPrefix = std::string("EXTEND_TIMEOUT_USEC=");
+
 // Multiplier to convert between milliseconds and nanoseconds
 const uint64_t msToNano = 1000000;
 
@@ -75,6 +81,19 @@ void notifyStatus(std::string status) {
     sd_pid_notify(getpid(), 0, statusPrefix.append(status).c_str());
 }
 
+// Sends the specified PID of the service to systemd in case the service manager did not fork off the process itself
+void sendMainPid(int pid) {
+    std::string mainPidStr = std::string(mainPidPrefix);
+    sd_pid_notify(getpid(), 0, mainPidStr.append(std::to_string(pid)).c_str());
+}
+
+// Allows the kdb process to extend the amount of time taken to start the process (e.g. during TP log file checking)
+//  @param extendTimeUs The time extension required in microseconds
+void extendStartTimeout(int extendTimeUs) {
+    std::string timeoutStr = std::string(extendStartTimeoutPrefix);
+    sd_pid_notify(getpid(), 0, timeoutStr.append(std::to_string(extendTimeUs)).c_str());
+}
+
 }   // namespace kdbsystemd
 
 
@@ -115,5 +134,30 @@ extern "C" K sendStatus(K status) {
         return krr((char*) "[lib-kdbsystemd] No status specified");
 
     kdbsystemd::notifyStatus(statusStr);
+    return kb(1);
+}
+
+extern "C" K sendMainPid(K intOrNullArg) {
+    int pid = getpid();
+
+    if(intOrNullArg->t != -KI)
+        pid = intOrNullArg->i;
+
+    kdbsystemd::sendMainPid(pid);
+    return kb(1);
+}
+
+extern "C" K extendStartTimeout(K timespan) {
+    int timeoutUs;
+
+    if(timespan->t == -KN)
+        timeoutUs = timespan->j / 1000;
+    else
+        return krr((char*) "[lib-kdbsystemd] Incorrect type for start timeout extension. Must be timespan");
+
+    if(timeoutUs <= 0)
+        return krr((char*) "[lib-kdbsystemd] Incorrect value for start timeout extension. Must be greater than 0 us");
+
+    kdbsystemd::extendStartTimeout(timeoutUs);
     return kb(1);
 }
